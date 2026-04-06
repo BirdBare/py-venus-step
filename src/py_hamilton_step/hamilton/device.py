@@ -25,7 +25,6 @@ class HamiltonDevice:
         while True:
             self.connection.send("get_state\n")
             data = self.connection.receive()
-            print(data)
 
             if data != "Busy":
                 break
