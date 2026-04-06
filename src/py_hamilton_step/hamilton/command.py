@@ -1,12 +1,24 @@
 import abc
 import dataclasses
+import typing
 import uuid
 
-from .response import HamiltonResponse
+HamiltonResponseType = typing.TypeVar("HamiltonResponseType", bound="HamiltonResponse")
 
 
 @dataclasses.dataclass
-class HamiltonCommand(abc.ABC):
+class HamiltonResponse(abc.ABC):
+    """
+    Base class for all Hamilton responses.
+    The communication contract is that all serialized responses will contain the following fields:
+    - command_id: the unique identifier of the command that this response is for
+    """
+
+    command_id: str
+
+
+@dataclasses.dataclass
+class HamiltonCommand(abc.ABC, typing.Generic[HamiltonResponseType]):
     """
     Base class for all Hamilton commands.
     The communication contract is that all serialized command will contain the following fields:
@@ -22,5 +34,5 @@ class HamiltonCommand(abc.ABC):
         return {"id": str(self.id), "command": self.__class__.__name__, "args": {}}
 
     @abc.abstractmethod
-    def parse_response(self, data: dict) -> HamiltonResponse:
+    def parse_response(self, data: dict) -> HamiltonResponseType:
         pass
