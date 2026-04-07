@@ -17,7 +17,7 @@ class HamiltonResponse(abc.ABC):
     command_id: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(kw_only=True,frozen=True)
 class HamiltonCommand(abc.ABC, typing.Generic[HamiltonResponseType]):
     """
     Base class for all Hamilton commands.
@@ -28,10 +28,15 @@ class HamiltonCommand(abc.ABC, typing.Generic[HamiltonResponseType]):
     """
 
     id: str = dataclasses.field(init=False, default_factory=lambda: str(uuid.uuid4()))
+    venus_handle_errors: bool = False
 
     @abc.abstractmethod
     def as_dict(self) -> dict:
-        return {"id": str(self.id), "command": self.__class__.__name__, "args": {}}
+        return {
+            "id": str(self.id),
+            "command": self.__class__.__name__,
+            "args": {"venus_handle_errors": self.venus_handle_errors},
+        }
 
     @abc.abstractmethod
     def parse_response(self, data: dict) -> HamiltonResponseType:
