@@ -6,7 +6,7 @@ import uuid
 HamiltonResponseType = typing.TypeVar("HamiltonResponseType", bound="HamiltonResponse")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class HamiltonResponse(abc.ABC):
     """
     Base class for all Hamilton responses.
@@ -17,7 +17,7 @@ class HamiltonResponse(abc.ABC):
     command_id: str
 
 
-@dataclasses.dataclass(kw_only=True,frozen=True)
+@dataclasses.dataclass(kw_only=True, frozen=True)
 class HamiltonCommand(abc.ABC, typing.Generic[HamiltonResponseType]):
     """
     Base class for all Hamilton commands.
