@@ -1,7 +1,20 @@
 import dataclasses
 import typing
 
-from ..hamilton import HamiltonCommand, HamiltonResponse
+from ..hamilton import HamiltonCommand, HamiltonResponse, HamiltonStepReturnBlockDataPackage
+
+
+@dataclasses.dataclass(frozen=True)
+class Channel1000ulAspirateResponse(HamiltonResponse):
+    raw_channel_sequences_with_recovery_data: str
+    channel_sequences_with_recovery_data: HamiltonStepReturnBlockDataPackage = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "channel_sequences_with_recovery_data",
+            HamiltonStepReturnBlockDataPackage.parse_raw_step_return(self.raw_channel_sequences_with_recovery_data),
+        )
 
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
@@ -83,4 +96,8 @@ class Channel1000ulAspirate(HamiltonCommand):
 
         return command_dict
 
-    def parse_response(self, data: dict) -> HamiltonResponse: ...
+    def parse_response(self, data: dict) -> Channel1000ulAspirateResponse:
+        return Channel1000ulAspirateResponse(
+            command_id=data["command_id"],
+            raw_channel_sequences_with_recovery_data=data["raw_channel_sequences_with_recovery_data"],
+        )
