@@ -304,7 +304,8 @@ class DelimiterError(HamiltonError):
     """
 
 
-error_by_main_error_number = {
+_main_error_by_id = {
+    0: None,
     1: HamiltonSyntaxError,
     2: HardwareError,
     3: NotExecutedError,
