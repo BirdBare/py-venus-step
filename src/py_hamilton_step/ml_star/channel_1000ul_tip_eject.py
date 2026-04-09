@@ -6,40 +6,49 @@ from ..hamilton import HamiltonCommand, HamiltonResponse, HamiltonStepReturnBloc
 
 @dataclasses.dataclass(frozen=True)
 class Channel1000ulTipEjectResponse(HamiltonResponse):
-    raw_channel_sequences_with_recovery_data: str
-    channel_sequences_with_recovery_data: HamiltonStepReturnBlockDataPackage = dataclasses.field(init=False)
+    raw_channel_sequences_with_recovery_details: str
+    channel_sequences_with_recovery_details: HamiltonStepReturnBlockDataPackage = dataclasses.field(init=False)
 
     def __post_init__(self):
         object.__setattr__(
             self,
-            "channel_sequences_with_recovery_data",
-            HamiltonStepReturnBlockDataPackage.parse_raw_step_return(self.raw_channel_sequences_with_recovery_data),
+            "channel_sequences_with_recovery_details",
+            HamiltonStepReturnBlockDataPackage.parse_raw_step_return(self.raw_channel_sequences_with_recovery_details),
         )
 
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
-class ChannelConfig:
+class Channel1000ulTipEjectChannelConfig:
     channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8]
     sequence_labware: str
     sequence_position: str
 
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
-class Channel1000ulTipEject(HamiltonCommand):
-    channel_configs: tuple[ChannelConfig, ...]
+class Channel1000ulTipEjectCommand(HamiltonCommand):
+    channel_configs: tuple[Channel1000ulTipEjectChannelConfig, ...]
 
     def as_dict(self) -> dict:
         command_dict = super().as_dict()
 
+        channel_configs = sorted(self.channel_configs, key=lambda config: config.channel_number)
+
+        args = command_dict["args"]
+
         # zip channel configs into associated lists
-        command_dict["channel_number"] = [config.channel_number for config in self.channel_configs]
-        command_dict["sequence_labware"] = [config.sequence_labware for config in self.channel_configs]
-        command_dict["sequence_position"] = [config.sequence_position for config in self.channel_configs]
+        args["channel_number"] = [config.channel_number for config in channel_configs]
+        args["sequence_labware"] = [config.sequence_labware for config in channel_configs]
+        args["sequence_position"] = [config.sequence_position for config in channel_configs]
+
+        # create a channel_variable from channel_number
+        args["channel_variable"] = "".join(
+            ["1" if i + 1 in args["channel_number"] else "0" for i in range(16)],
+        )
 
         return command_dict
 
     def parse_response(self, data: dict) -> Channel1000ulTipEjectResponse:
         return Channel1000ulTipEjectResponse(
             command_id=data["command_id"],
-            raw_channel_sequences_with_recovery_data=data["raw_channel_sequences_with_recovery_data"],
+            raw_channel_sequences_with_recovery_details=data["raw_channel_sequences_with_recovery_details"],
         )
