@@ -1,33 +1,33 @@
 import abc
+import asyncio
 import platform
-import socket
 
-import serial
+import serial_asyncio
 
 
 class HamiltonConnection(abc.ABC):
     @abc.abstractmethod
-    def connect(self) -> None:
+    async def connect(self) -> None:
         pass
 
     @abc.abstractmethod
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         pass
 
     @abc.abstractmethod
-    def send(self, data: str) -> None:
+    async def send(self, data: str) -> None:
         pass
 
     @abc.abstractmethod
-    def receive(self) -> str:
+    async def receive(self) -> str:
         pass
 
-    def __enter__(self):
-        self.connect()
+    async def __aenter__(self):
+        await self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.disconnect()
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.disconnect()
 
 
 class UnixSocketConnection(HamiltonConnection):
@@ -35,86 +35,82 @@ class UnixSocketConnection(HamiltonConnection):
     Implementation of HamiltonConnection using Unix domain sockets.
     Meant to be used for communication where python is running on a unix machine and Venus is running in a virtual machine.
     General use is MacOS host with parallels running a windows VM with Venus.
+    Venus must be started manually on the windows VM
     """
 
     def __init__(self, socket_path: str):
         super().__init__()
-
         if platform.system() not in ["Linux", "Darwin"]:
             raise OSError("UnixSocketConnection can only be used on Unix machines.")
-
         self.socket_path = socket_path
-        self.sock = None
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
 
-    def connect(self) -> None:
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.sock.settimeout(10)
-        self.sock.connect(self.socket_path)
+    async def connect(self) -> None:
+        self._reader, self._writer = await asyncio.open_unix_connection(self.socket_path)
 
-    def disconnect(self) -> None:
-        if not self.sock:
+    async def disconnect(self) -> None:
+        if not self._writer:
             raise ConnectionError("Not connected to socket.")
+        self._writer.close()
+        await self._writer.wait_closed()
+        self._reader = self._writer = None
 
-        self.sock.close()
-        self.sock = None
-
-    def send(self, data: str) -> None:
+    async def send(self, data: str) -> None:
         if not data.endswith("\n"):
             raise ValueError("Data must end with a newline character.")
-
-        if not self.sock:
+        if not self._writer:
             raise ConnectionError("Not connected to socket.")
+        self._writer.write(data.encode())
+        await self._writer.drain()
 
-        self.sock.sendall(data.encode())
-
-    def receive(self) -> str:
-        if not self.sock:
+    async def receive(self) -> str:
+        if not self._reader:
             raise ConnectionError("Not connected to socket.")
-
-        with self.sock.makefile(buffering=1) as f:
-            return f.readline().strip()
+        line = await self._reader.readline()
+        return line.decode().strip()
 
 
 class WindowsVirtualCOMConnection(HamiltonConnection):
     """
     Implementation of HamiltonConnection using virtual COM ports.
     Meant to be used for communication where python and Venus are running on the same windows machine.
+    Venus will be started automatically as a subprocess.
     """
 
     def __init__(self, com_port: str):
         super().__init__()
-
         if platform.system() != "Windows":
             raise OSError("WindowsVirtualCOMConnection can only be used on Windows machines.")
-
         self.com_port = com_port
-        self.serial_port = None
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
 
-    def connect(self) -> None:
-        self.serial_port = serial.Serial(self.com_port, baudrate=9600, timeout=10)
+    async def connect(self) -> None:
+        self._reader, self._writer = await serial_asyncio.open_serial_connection(
+            url=self.com_port,
+            baudrate=9600,
+        )
+        # TODO: launch Venus subprocess
 
-        # TODO: use subprocess to start venus software
-
-    def disconnect(self) -> None:
-        if not self.serial_port:
+    async def disconnect(self) -> None:
+        if not self._writer:
             raise ConnectionError("Not connected to COM port.")
+        self._writer.close()
+        await self._writer.wait_closed()
+        self._reader = self._writer = None
+        # TODO: kill Venus subprocess
 
-        self.serial_port.close()
-        self.serial_port = None
-
-        # TODO: kill venus software subprocess
-
-    def send(self, data: str) -> None:
+    async def send(self, data: str) -> None:
         if not data.endswith("\n"):
             raise ValueError("Data must end with a newline character.")
-
-        if not self.serial_port:
+        if not self._writer:
             raise ConnectionError("Not connected to COM port.")
+        self._writer.write(data.encode())
+        await self._writer.drain()
 
-        self.serial_port.write(data.encode())
-
-    def receive(self) -> str:
-        if not self.serial_port:
+    async def receive(self) -> str:
+        if not self._reader:
             raise ConnectionError("Not connected to COM port.")
-
-        return self.serial_port.readline().decode().strip()
+        line = await self._reader.readline()
+        return line.decode().strip()
