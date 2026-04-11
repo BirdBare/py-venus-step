@@ -35,6 +35,16 @@ _on_off_setting_by_name = {
     "On": 1,
 }
 
+_used_front_channel_setting_by_name = {
+    "Channel 2": 2,
+    "Channel 3": 3,
+    "Channel 4": 4,
+    "Channel 5": 5,
+    "Channel 6": 6,
+    "Channel 7": 7,
+    "Channel 8": 8,
+}
+
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulCoreGripGetPlateCommand(HamiltonCommand):
@@ -86,7 +96,7 @@ class Channel1000ulCoreGripGetPlateCommand(HamiltonCommand):
         args["plate_sequence_labware"] = str(self.plate_sequence_labware)
         args["lid_sequence_labware"] = str(self.lid_sequence_labware)
         args["gripper_tool_sequence_labware"] = self.gripper_tool_sequence_labware
-        args["used_front_channel"] = self.used_front_channel
+        args["used_front_channel"] = _used_front_channel_setting_by_name[self.used_front_channel]
         args["grip_height_mm"] = self.grip_height_mm
         args["grip_width_mm"] = self.grip_width_mm
         args["opening_width_before_access"] = self.opening_width_before_access
