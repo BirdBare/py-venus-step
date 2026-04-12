@@ -304,7 +304,7 @@ class DelimiterError(HamiltonError):
     """
 
 
-_main_error_by_id = {
+_main_error_by_id: dict[int, type[HamiltonError] | None] = {
     0: None,
     1: HamiltonSyntaxError,
     2: HardwareError,

@@ -54,7 +54,7 @@ class HamiltonStepReturnBlockDataPackage:
         """Base class for hamilton block data."""
 
         num: int
-        main_err: None | HamiltonError
+        main_err: None | type[HamiltonError]
         slave_err: None | str
         recovery_button: (
             None
