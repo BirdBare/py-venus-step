@@ -49,7 +49,8 @@ class LockUnlockFrontCoverCommand(HamiltonCommand):
 
         return command_dict
 
-    def parse_response(self, data: dict) -> LockUnlockFrontCoverResponse:
+    @staticmethod
+    def parse_response(data: dict) -> LockUnlockFrontCoverResponse:
         return LockUnlockFrontCoverResponse(
             command_id=data["command_id"],
             raw_cover_lock_status_as_block_data=data["raw_cover_lock_status_as_block_data"],

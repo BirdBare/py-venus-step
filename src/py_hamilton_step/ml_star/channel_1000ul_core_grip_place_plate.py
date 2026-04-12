@@ -84,7 +84,8 @@ class Channel1000ulCoreGripPlacePlateCommand(HamiltonCommand):
 
         return command_dict
 
-    def parse_response(self, data: dict) -> Channel1000ulCoreGripPlacePlateResponse:
+    @staticmethod
+    def parse_response(data: dict) -> Channel1000ulCoreGripPlacePlateResponse:
         return Channel1000ulCoreGripPlacePlateResponse(
             command_id=data["command_id"],
             raw_place_plate_data_with_recovery_details=data["raw_place_plate_data_with_recovery_details"],

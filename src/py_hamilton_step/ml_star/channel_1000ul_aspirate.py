@@ -126,7 +126,8 @@ class Channel1000ulAspirateCommand(HamiltonCommand):
 
         return command_dict
 
-    def parse_response(self, data: dict) -> Channel1000ulAspirateResponse:
+    @staticmethod
+    def parse_response(data: dict) -> Channel1000ulAspirateResponse:
         return Channel1000ulAspirateResponse(
             command_id=data["command_id"],
             raw_channel_sequences_with_recovery_details=data["raw_channel_sequences_with_recovery_details"],

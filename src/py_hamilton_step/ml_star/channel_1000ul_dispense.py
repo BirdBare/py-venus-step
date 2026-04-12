@@ -137,7 +137,8 @@ class Channel1000ulDispenseCommand(HamiltonCommand):
 
         return command_dict
 
-    def parse_response(self, data: dict) -> Channel1000ulDispenseResponse:
+    @staticmethod
+    def parse_response(data: dict) -> Channel1000ulDispenseResponse:
         return Channel1000ulDispenseResponse(
             command_id=data["command_id"],
             raw_channel_sequences_with_recovery_details=data["raw_channel_sequences_with_recovery_details"],

@@ -38,6 +38,7 @@ class HamiltonCommand(abc.ABC, typing.Generic[HamiltonResponseType]):
             "args": {"venus_handle_errors": str(self.venus_handle_errors)},
         }
 
+    @staticmethod
     @abc.abstractmethod
-    def parse_response(self, data: dict) -> HamiltonResponseType:
+    def parse_response(data: dict) -> HamiltonResponseType:
         pass
