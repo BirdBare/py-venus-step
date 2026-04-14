@@ -43,23 +43,13 @@ _x_acceleration_level_setting_by_name = {
     "X acceleration level 5": 4,
 }
 
-_on_off_setting_by_name = {
-    "Off": 0,
-    "On": 1,
-}
-
-_yes_no_setting_by_name = {
-    "No": 0,
-    "Yes": 1,
-}
-
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulCoreGripPlacePlateCommand(VenusCommand):
     transport_mode: typing.Literal["Plate only", "Lid only", "Plate with lid"] = "Plate only"
     plate_sequence_labware: str | None = None
     lid_sequence_labware: str | None = None
-    eject_tool_when_finish: typing.Literal["No", "Yes"] = "No"
+    eject_tool_when_finish: bool = False
 
     # Advanced
     x_acceleration_level: typing.Literal[
@@ -71,7 +61,7 @@ class Channel1000ulCoreGripPlacePlateCommand(VenusCommand):
     ] = "X acceleration level 4"
     z_speed_mm_per_s: float = 128.7
     plate_press_on_distance_mm: float = 1
-    check_if_plate_exists: typing.Literal["Off", "On"] = "Off"
+    check_if_plate_exists: bool = False
 
     def as_dict(self) -> dict:
         command_dict = super().as_dict()
@@ -81,11 +71,11 @@ class Channel1000ulCoreGripPlacePlateCommand(VenusCommand):
         args["transport_mode"] = _transport_mode_setting_by_name[self.transport_mode]
         args["plate_sequence_labware"] = str(self.plate_sequence_labware)
         args["lid_sequence_labware"] = str(self.lid_sequence_labware)
-        args["eject_tool_when_finish"] = _yes_no_setting_by_name[self.eject_tool_when_finish]
+        args["eject_tool_when_finish"] = int(self.eject_tool_when_finish)
         args["x_acceleration_level"] = _x_acceleration_level_setting_by_name[self.x_acceleration_level]
         args["z_speed_mm_per_s"] = self.z_speed_mm_per_s
         args["plate_press_on_distance_mm"] = self.plate_press_on_distance_mm
-        args["check_if_plate_exists"] = _on_off_setting_by_name[self.check_if_plate_exists]
+        args["check_if_plate_exists"] = int(self.check_if_plate_exists)
 
         return command_dict
 

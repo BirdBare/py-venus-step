@@ -19,7 +19,7 @@ class Channel1000ulTipPickupResponse(VenusResponse):
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulTipPickupChannelConfig:
-    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8]
+    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8,9, 10, 11, 12, 13, 14, 15, 16]
     sequence_labware: str
     sequence_position: str
 

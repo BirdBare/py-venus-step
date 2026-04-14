@@ -35,21 +35,6 @@ _transport_mode_setting_by_name = {
     "Plate with lid": 2,
 }
 
-_on_off_setting_by_name = {
-    "Off": 0,
-    "On": 1,
-}
-
-_used_front_channel_setting_by_name = {
-    "Channel 2": 2,
-    "Channel 3": 3,
-    "Channel 4": 4,
-    "Channel 5": 5,
-    "Channel 6": 6,
-    "Channel 7": 7,
-    "Channel 8": 8,
-}
-
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulCoreGripGetPlateCommand(VenusCommand):
@@ -59,15 +44,7 @@ class Channel1000ulCoreGripGetPlateCommand(VenusCommand):
 
     # Gripper tool parameters
     gripper_tool_sequence_labware: str
-    used_front_channel: typing.Literal[
-        "Channel 2",
-        "Channel 3",
-        "Channel 4",
-        "Channel 5",
-        "Channel 6",
-        "Channel 7",
-        "Channel 8",
-    ] = "Channel 8"
+    used_front_channel: typing.Literal[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] = 8
 
     # Grip parameters
     grip_height_mm: float = 3
@@ -90,7 +67,7 @@ class Channel1000ulCoreGripGetPlateCommand(VenusCommand):
 
     grip_speed_mm_per_s: float = 277.8
     z_speed_mm_per_s: float = 128.7
-    check_if_plate_exists: typing.Literal["Off", "On"] = "Off"
+    check_if_plate_exists: bool = False
 
     def as_dict(self) -> dict:
         command_dict = super().as_dict()
@@ -101,13 +78,13 @@ class Channel1000ulCoreGripGetPlateCommand(VenusCommand):
         args["plate_sequence_labware"] = str(self.plate_sequence_labware)
         args["lid_sequence_labware"] = str(self.lid_sequence_labware)
         args["gripper_tool_sequence_labware"] = self.gripper_tool_sequence_labware
-        args["used_front_channel"] = _used_front_channel_setting_by_name[self.used_front_channel]
+        args["used_front_channel"] = self.used_front_channel
         args["grip_height_mm"] = self.grip_height_mm
         args["grip_width_mm"] = self.grip_width_mm
         args["opening_width_before_access"] = self.opening_width_before_access
         args["grip_speed_mm_per_s"] = self.grip_speed_mm_per_s
         args["z_speed_mm_per_s"] = self.z_speed_mm_per_s
-        args["check_if_plate_exists"] = _on_off_setting_by_name[self.check_if_plate_exists]
+        args["check_if_plate_exists"] = int(self.check_if_plate_exists)
 
         return command_dict
 

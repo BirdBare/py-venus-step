@@ -19,7 +19,7 @@ class Channel1000ulDispenseResponse(VenusResponse):
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulDispenseChannelConfig:
-    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8]
+    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     sequence_labware: str
     sequence_position: str
     volume_ul: float
@@ -41,17 +41,17 @@ class Channel1000ulDispenseChannelConfig:
         "Low",
         "From labware definition",
     ] = "From labware definition"
-    touch_off: typing.Literal["Off", "On"] = "Off"
+    touch_off: bool = False
     retract_distance_for_transport_air_mm: float = 5
     submerge_depth_mm: float = 2
     dispense_position_above_touch_mm: float = 0.5
 
     # Advanced
     liquid_class: str
-    liquid_following_during_dispense_and_mix: typing.Literal["Off", "On"] = "On"
+    liquid_following_during_dispense_and_mix: bool = True
 
     # Mix settings
-    cycles: int = 0
+    mix_cycles: int = 0
     mix_position_mm: float = 2
     mix_volume_ul: float = 0
 
@@ -75,10 +75,6 @@ _dispense_mode_setting_by_name = {
     "Blowout tip": 9,
 }
 
-_on_off_setting_by_name = {
-    "Off": 0,
-    "On": 1,
-}
 
 _z_move_setting_by_name = {
     "normal": 0,
@@ -99,7 +95,7 @@ class Channel1000ulDispenseCommand(VenusCommand):
 
         args = command_dict["args"]
 
-        args["side_touch"] = _on_off_setting_by_name[self.side_touch]
+        args["side_touch"] = int(self.side_touch)
         args["z_move_after_step"] = _z_move_setting_by_name[self.z_move_after_step]
 
         # zip channel configs into associated lists
@@ -112,7 +108,7 @@ class Channel1000ulDispenseCommand(VenusCommand):
         args["capacitive_lld_sensitivity"] = [
             _lld_sensitivity_setting_by_name[config.capacitive_lld_sensitivity] for config in channel_configs
         ]
-        args["touch_off"] = [_on_off_setting_by_name[config.touch_off] for config in channel_configs]
+        args["touch_off"] = [int(config.touch_off) for config in channel_configs]
 
         args["retract_distance_for_transport_air_mm"] = [
             config.retract_distance_for_transport_air_mm for config in channel_configs
@@ -123,10 +119,10 @@ class Channel1000ulDispenseCommand(VenusCommand):
         ]
         args["liquid_class"] = [config.liquid_class for config in channel_configs]
         args["liquid_following_during_dispense_and_mix"] = [
-            _on_off_setting_by_name[config.liquid_following_during_dispense_and_mix] for config in channel_configs
+            int(config.liquid_following_during_dispense_and_mix) for config in channel_configs
         ]
 
-        args["cycles"] = [config.cycles for config in channel_configs]
+        args["mix_cycles"] = [config.mix_cycles for config in channel_configs]
         args["mix_position_mm"] = [config.mix_position_mm for config in channel_configs]
         args["mix_volume_ul"] = [config.mix_volume_ul for config in channel_configs]
 

@@ -19,7 +19,7 @@ class Channel1000ulAspirateResponse(VenusResponse):
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class Channel1000ulAspirateChannelConfig:
-    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8]
+    channel_number: typing.Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     sequence_labware: str
     sequence_position: str
     volume_ul: float
@@ -42,17 +42,17 @@ class Channel1000ulAspirateChannelConfig:
         "From labware definition",
     ] = "Off"
     fix_height_from_bottom_mm: float = 5
-    touch_off: typing.Literal["Off", "On"] = "Off"
+    touch_off: bool = False
     submerge_depth_mm: float = 2
     max_height_difference_mm: float = 0
     retract_distance_for_transport_air_mm: float = 5
     aspiration_position_above_touch_mm: float = 0.5
 
     # Advanced
-    liquid_following_during_aspirate_and_mix: typing.Literal["Off", "On"] = "On"
+    liquid_following_during_aspirate_and_mix: bool = True
 
     # Mix settings
-    cycles: int = 0
+    mix_cycles: int = 0
     mix_position_mm: float = 2
     mix_volume_ul: float = 0
 
@@ -70,11 +70,6 @@ _aspiration_mode_setting_by_name = {
     "Aspiration": 0,
     "Consecutive aspiration": 1,
     "Aspirate all": 2,
-}
-
-_on_off_setting_by_name = {
-    "Off": 0,
-    "On": 1,
 }
 
 
@@ -103,7 +98,7 @@ class Channel1000ulAspirateCommand(VenusCommand):
             _lld_sensitivity_setting_by_name[config.pressure_lld_sensitivity] for config in channel_configs
         ]
         args["fix_height_from_bottom_mm"] = [config.fix_height_from_bottom_mm for config in channel_configs]
-        args["touch_off"] = [_on_off_setting_by_name[config.touch_off] for config in channel_configs]
+        args["touch_off"] = [int(config.touch_off) for config in channel_configs]
         args["submerge_depth_mm"] = [config.submerge_depth_mm for config in channel_configs]
         args["max_height_difference_mm"] = [config.max_height_difference_mm for config in channel_configs]
         args["retract_distance_for_transport_air_mm"] = [
@@ -113,9 +108,9 @@ class Channel1000ulAspirateCommand(VenusCommand):
             config.aspiration_position_above_touch_mm for config in channel_configs
         ]
         args["liquid_following_during_aspirate_and_mix"] = [
-            _on_off_setting_by_name[config.liquid_following_during_aspirate_and_mix] for config in channel_configs
+            int(config.liquid_following_during_aspirate_and_mix) for config in channel_configs
         ]
-        args["cycles"] = [config.cycles for config in channel_configs]
+        args["cycles"] = [config.mix_cycles for config in channel_configs]
         args["mix_position_mm"] = [config.mix_position_mm for config in channel_configs]
         args["mix_volume_ul"] = [config.mix_volume_ul for config in channel_configs]
 
