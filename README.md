@@ -13,8 +13,8 @@ The intended use case is AI-driven protocol composition, where an agent needs to
 py-venus-step is the foundation layer of a three-tier system, currently under development:
 
 - **py-venus-step** — local Python library communicating with Venus via virtual serial port (com0com on Windows x64, Parallels on development environments)
-- **FastAPI layer** — REST interface making the local library network-accessible for multi-instrument orchestration
 - **MCP layer** — Model Context Protocol wrapper exposing Hamilton control as tools to AI agents
+- **Orchestration layer** - LangGraph multi agent execution
 
 ## License
 
